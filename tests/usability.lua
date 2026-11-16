@@ -63,3 +63,21 @@ NS.searchLinkHookInstalled=nil; ChatFrameUtil=nil; ChatEdit_InsertLink=function(
 NS.InstallSearchLinkHook()
 check(hookCount==2,"Legacy insertion API is supported")
 hooksecurefunc,ChatFrameUtil,ChatEdit_InsertLink,IsShiftKeyDown=oldHook,oldModern,oldLegacy,oldShift
+
+NS.OpenSearch(); drain()
+NS.RunWork("search",function() NS.SetWorkStage("Sorting results"); coroutine.yield() end,function() end)
+NS.UpdateSearchProgress(0.1)
+check(NS.SearchActivity()=="Sorting results" and NS.ui.searchProgress:IsShown() and not NS.ui.status:IsShown(),"Active search displays stage and progress without overlapping status")
+NS.CancelWork("search"); NS.UpdateSearchProgress(0.1)
+check(not NS.SearchActivity() and not NS.ui.searchProgress:IsShown() and NS.ui.status:IsShown(),"Cancellation removes progress and restores status")
+NS.RunWork("itemIndex",function() coroutine.yield() end,function() end)
+NS.UpdateSearchProgress(0.1)
+check(NS.SearchActivity()=="Loading items" and NS.ui.searchProgress:IsShown(),"Initial item indexing displays progress")
+drain(); NS.UpdateSearchProgress(0.1)
+check(not NS.ui.searchProgress:IsShown(),"Completed indexing clears progress")
+local failed=false
+NS.RunWork("search",function() coroutine.yield(); error("test failure") end,function() end,function() failed=true end)
+drain(); NS.UpdateSearchProgress(0.1)
+check(failed and not NS.ui.searchProgress:IsShown(),"Failed searches cannot leave a stuck progress bar")
+setCombat(true); NS.UpdateSearchProgress(0.1); setCombat(false)
+NS.Close()

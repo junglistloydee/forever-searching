@@ -1,5 +1,17 @@
 local _, NS = ...
 local jobs, threads = {}, {}
+function NS.SetWorkStage(label)
+    local job = threads[coroutine.running()]
+    if job then job.stage = label end
+end
+
+function NS.SearchActivity()
+    for _, entry in ipairs({{"catalogue", "Loading NPCs"}, {"itemIndex", "Loading items"},
+        {"questIndex", "Loading quests"}, {"search", "Finding closest sources"}}) do
+        local job = jobs[entry[1]]
+        if job then return job.stage or entry[2] end
+    end
+end
 local function Clock()
     return debugprofilestop and debugprofilestop() or os.clock() * 1000
 end

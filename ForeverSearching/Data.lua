@@ -270,8 +270,11 @@ function NS.RequestFind(query, complete, failed)
         elseif mode == "item" or mode == "quest" then rows, metrics, origin = NS.FindSources(query, mode, context)
         else rows, metrics, origin = NS.Find(query, context) end
         local stats
+        NS.SetWorkStage("Filtering results")
         rows, stats = NS.FilterResults(rows, metrics)
+        NS.SetWorkStage("Sorting results")
         rows = NS.SortSearchResults(rows, metrics)
+        NS.SetWorkStage("Grouping sources")
         local groups = NS.MakeGroups(rows, metrics)
         NS.searchResults, NS.searchOrigin, NS.resultStats, NS.resultGroups = metrics, origin, stats, groups
         return rows

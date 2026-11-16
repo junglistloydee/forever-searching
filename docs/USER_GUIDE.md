@@ -1,8 +1,12 @@
 # Forever Searching
 
-A WoW Forever addon with combined NPC, item and quest search, a collected-appearance wardrobe with custom profiles, vendor listings, location evidence, and native map/minimap navigation in a native Forever interface. Interface version **16001**, version **0.14.5**.
+A WoW Forever addon with combined NPC, item and quest search, a collected-appearance wardrobe with custom profiles, vendor listings, location evidence, and native map/minimap navigation in a native Forever interface. Interface version **16001**, version **0.14.6**.
 
 **Author:** [junglistloydee](https://github.com/junglistloydee)
+
+## Search activity bar in 0.14.6
+
+An animated gold bar in the search status area shows catalogue loading, searching, filtering, sorting and grouping stages. It indicates activity rather than an estimated percentage and clears when work finishes, fails or is cancelled. No game-setting or keybinding changes.
 
 ## Clearer database status in 0.14.5
 

@@ -2,6 +2,19 @@ local _, NS = ...
 local gold = {1, 0.82, 0}
 local muted = {0.70, 0.70, 0.70}
 local pageSize = 6
+function NS.UpdateSearchProgress(elapsed)
+    local ui = NS.ui
+    if InCombatLockdown() or not ui or not ui.searchProgress then return end
+    local progress = ui.searchProgress
+    local stage = NS.SearchActivity()
+    local active = stage ~= nil and ui:IsShown() and not ui.transmogPanel:IsShown()
+    progress:SetShown(active); ui.status:SetShown(not active)
+    if not active then progress.elapsed=0; return end
+    progress.elapsed = (progress.elapsed or 0) + (elapsed or 0)
+    local offset = (1-math.cos(progress.elapsed*2.5))*0.5*584
+    progress.pulse:ClearAllPoints(); progress.pulse:SetPoint("TOPLEFT",4+offset,-3)
+    progress.label:SetText(stage .. "...")
+end
 function NS.InstallSearchLinkHook()
     if NS.searchLinkHookInstalled or type(hooksecurefunc) ~= "function" then return end
     local function InsertItemLink(link)
@@ -774,6 +787,15 @@ function NS.BuildUI()
     ui.status = Text(content, "Ready. Search by name, purpose, zone, or NPC ID.", "GameFontHighlightSmall", 24, -590, 732)
     ui.status:SetHeight(23)
     ui.status:SetJustifyV("TOP")
+    local progress = CreateFrame("Frame", nil, content, "BackdropTemplate")
+    ui.searchProgress = progress
+    progress:SetPoint("TOPLEFT",24,-590); progress:SetSize(732,23); Panel(progress)
+    local pulse = progress:CreateTexture(nil,"ARTWORK")
+    pulse:SetTexture("Interface\\TargetingFrame\\UI-StatusBar")
+    pulse:SetVertexColor(0.65,0.46,0.08,0.8); pulse:SetSize(140,17)
+    progress.pulse = pulse
+    progress.label = Text(progress,"","GameFontHighlightSmall",8,-6,716)
+    progress:Hide()
     ui.provider = Text(content, NS.catalogueStatus, "GameFontHighlightSmall", 24, -622, 732, muted)
     local dataHelp=Button(content,"About / Data",136,25)
     dataHelp:SetPoint("TOPRIGHT",-24,-615)
@@ -854,6 +876,7 @@ function NS.BuildUI()
         ui.searchPending, ui.refreshAgain = false, false
     end)
     ui:SetScript("OnUpdate", function(self, elapsed)
+        NS.UpdateSearchProgress(elapsed)
         self.fadeElapsed=(self.fadeElapsed or 0)+elapsed
         if self.fadeElapsed>=0.1 then NS.UpdateMovementFade(self.fadeElapsed); self.fadeElapsed=0 end
         if not NS.db.settings.liveRefresh or InCombatLockdown() or not self:IsShown() or self.searchPending
