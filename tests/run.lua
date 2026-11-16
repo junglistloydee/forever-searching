@@ -303,6 +303,7 @@ function methods:SetChecked(value) self.checked = value end
 function methods:GetChecked() return self.checked end
 function methods:SetFocus() self.focused = true end
 function methods:ClearFocus() self.focused = false end
+function methods:HasFocus() return self.focused == true end
 local objectMeta = {__index = function(_, key)
     if methods[key] then return methods[key] end
     if key:match("^[A-Z]") then return function() end end

@@ -24,3 +24,42 @@ NS.ui.page=1; NS.ui.listInset.scripts.OnMouseWheel(NS.ui.listInset,-1)
 check(NS.ui.page==math.min(2,math.max(1,math.ceil(#NS.ui.displayRows/6))),"Mouse wheel advances result pages within bounds")
 NS.Close()
 check(not menu:IsShown(),"Closing search dismisses its dropdown")
+
+local oldHook,oldModern,oldLegacy,oldShift=hooksecurefunc,ChatFrameUtil,ChatEdit_InsertLink,IsShiftKeyDown
+local callback,hookCount,shift=nil,0,true
+ChatFrameUtil={InsertLink=function() return false end}
+local nativeInsert=ChatFrameUtil.InsertLink
+hooksecurefunc=function(owner,key,fn)
+    hookCount=hookCount+1
+    if type(owner)=="table" then
+        check(owner==ChatFrameUtil and key=="InsertLink","Modern chat link hook targets native insertion")
+        callback=fn
+    else
+        check(owner=="ChatEdit_InsertLink","Legacy client uses chat insertion fallback")
+        callback=key
+    end
+end
+IsShiftKeyDown=function() return shift end
+NS.InstallSearchLinkHook(); NS.InstallSearchLinkHook()
+check(hookCount==1 and ChatFrameUtil.InsertLink==nativeInsert,"Link hook installs once without replacing native function")
+NS.OpenSearch(); drain()
+NS.db.settings.searchMode="quest"
+callback("|cffffffff|Hitem:117:0:0:0|h[Tough Jerky]|h|r"); drain()
+check(NS.ui.search:GetText()=="117" and NS.db.settings.searchMode=="item","Focused Shift-click searches exact item ID in Items mode")
+local function ignored(link,label)
+    NS.ui.search:SetText("unchanged"); drain()
+    callback(link); drain()
+    check(NS.ui.search:GetText()=="unchanged",label)
+end
+ignored("|Hquest:117:1|h[Quest]|h","Quest links do not trigger item search")
+ignored("|Hitem:0:0|h[Invalid]|h","Invalid item IDs are ignored")
+shift=false; ignored("item:118","Unmodified clicks do not trigger search"); shift=true
+NS.ui.search:ClearFocus(); ignored("item:118","Unfocused search does not capture links")
+NS.ui.search:SetFocus(); setCombat(true); callback("item:118")
+check(NS.ui.search:GetText()=="unchanged","Item link searches are blocked during combat"); setCombat(false)
+NS.ui.transmogPanel:Show(); ignored("item:118","Wardrobe does not capture main search links"); NS.ui.transmogPanel:Hide()
+NS.Close(); NS.ui.search:SetFocus(); ignored("item:118","Hidden window does not capture links")
+NS.searchLinkHookInstalled=nil; ChatFrameUtil=nil; ChatEdit_InsertLink=function() end
+NS.InstallSearchLinkHook()
+check(hookCount==2,"Legacy insertion API is supported")
+hooksecurefunc,ChatFrameUtil,ChatEdit_InsertLink,IsShiftKeyDown=oldHook,oldModern,oldLegacy,oldShift

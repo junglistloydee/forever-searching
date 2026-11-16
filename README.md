@@ -4,7 +4,7 @@ A free addon for WoW Forever that brings NPC, item and quest search, vendor disc
 
 **Author:** [junglistloydee](https://github.com/junglistloydee)
 
-**Status:** Public beta · **Version:** 0.14.2 · **Interface:** 16001
+**Status:** Public beta · **Version:** 0.14.3 · **Interface:** 16001
 
 ## Features
 
@@ -23,6 +23,8 @@ A free addon for WoW Forever that brings NPC, item and quest search, vendor disc
 2. Copy that folder into your WoW Forever `Interface/AddOns` directory. The path should end in `Interface/AddOns/ForeverSearching/ForeverSearching.toc`.
 3. For the searchable database, install the Forever-compatible **QuestieDB** addon separately and enable it.
 4. Restart the client or reload its UI, then type **`/find`**.
+
+With the main search field focused, Shift-click an item link in chat to search its item ID in Items mode. This interaction still needs verification in the live client.
 
 There are no automatic keyboard bindings. The addon stores its own preferences in `ForeverSearchingDB`; it does not write global game settings or keybindings.
 

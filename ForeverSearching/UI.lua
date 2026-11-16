@@ -2,6 +2,28 @@ local _, NS = ...
 local gold = {1, 0.82, 0}
 local muted = {0.70, 0.70, 0.70}
 local pageSize = 6
+function NS.InstallSearchLinkHook()
+    if NS.searchLinkHookInstalled or type(hooksecurefunc) ~= "function" then return end
+    local function InsertItemLink(link)
+        local ui = NS.ui
+        if InCombatLockdown() or not ui or not ui:IsShown() or not ui.search:HasFocus()
+            or (ui.transmogPanel and ui.transmogPanel:IsShown())
+            or type(IsShiftKeyDown) ~= "function" or not IsShiftKeyDown() or type(link) ~= "string" then return end
+        local id = tonumber(link:match("|Hitem:(%d+)[:|]") or link:match("^item:(%d+)[:|]") or link:match("^item:(%d+)$"))
+        if not id or id <= 0 then return end
+        NS.db.settings.searchMode = "item"
+        NS.RefreshSettings()
+        ui.search:SetText(tostring(id))
+        ui.search:HighlightText()
+        NS.SetStatus("Searching linked item ID " .. id .. ".")
+    end
+    if type(ChatFrameUtil) == "table" and type(ChatFrameUtil.InsertLink) == "function" then
+        hooksecurefunc(ChatFrameUtil, "InsertLink", InsertItemLink)
+    elseif type(ChatEdit_InsertLink) == "function" then
+        hooksecurefunc("ChatEdit_InsertLink", InsertItemLink)
+    else return end
+    NS.searchLinkHookInstalled = true
+end
 local function OriginKey(origin)
     return origin and string.format("%d:%.4f:%.4f", origin.mapID, origin.x, origin.y) or "unknown"
 end
@@ -356,6 +378,7 @@ function NS.BuildUI()
     Panel(searchPanel)
     local search = CreateFrame("EditBox", nil, searchPanel)
     ui.search = search
+    NS.InstallSearchLinkHook()
     search:SetPoint("TOPLEFT", 12, -1)
     search:SetPoint("BOTTOMRIGHT", -112, 1)
     search:SetFontObject("GameFontHighlight")

@@ -1,8 +1,12 @@
 # Forever Searching
 
-A WoW Forever addon with combined NPC, item and quest search, a collected-appearance wardrobe with custom profiles, vendor listings, location evidence, and native map/minimap navigation in a native Forever interface. Interface version **16001**, version **0.14.2**.
+A WoW Forever addon with combined NPC, item and quest search, a collected-appearance wardrobe with custom profiles, vendor listings, location evidence, and native map/minimap navigation in a native Forever interface. Interface version **16001**, version **0.14.3**.
 
 **Author:** [junglistloydee](https://github.com/junglistloydee)
+
+## Shift-click item search in 0.14.3
+
+With the main search field focused, Shift-click an item link in chat to search its ID in Items mode. Uses a secure post-hook on the available chat insertion API without replacing native handlers. Non-item links, unfocused or hidden search, wardrobe and combat are ignored. No keybinding or global game-setting changes. Offline tests pass; live chat interaction still needs verification.
 
 ## Wardrobe footer spacing in 0.14.2
 
