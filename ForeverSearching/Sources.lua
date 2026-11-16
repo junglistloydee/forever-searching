@@ -31,6 +31,7 @@ function NS.StartReference(kind)
     local itemFields = {"name", "vendors"}
     NS.RunWork(kind .. "Index", function()
         local ids = entity.GetAllIds()
+        NS.SetWorkProgress(0,#ids,"Loading " .. (kind=="item" and "items" or "quests"))
         for i, id in ipairs(ids) do
             if kind == "item" then
                 local values = entity.GetAll(id, itemFields)
@@ -51,6 +52,7 @@ function NS.StartReference(kind)
                 NS[kind .. "Status"] = string.format("Loading %s catalogue: %d / %d", kind, i, #ids)
                 RefreshStatus()
             end
+            NS.SetWorkProgress(i,#ids)
             NS.WorkYield()
         end
         if kind == "item" then NS.MergeObservedItems() end
@@ -219,7 +221,12 @@ function NS.FindSources(query, kind, context)
         if #results == before then Add(nil, item.name, "No NPC source matches the current data/filters", itemID, questID) end
     end
     if query ~= "" and NS[kind .. "Ready"] then
-        for id, indexed in pairs(kind == "item" and NS.items or NS.quests) do
+        NS.SetWorkStage("Preparing " .. kind .. " search")
+        local entries=kind == "item" and NS.items or NS.quests
+        local keys=NS.WorkKeys(entries)
+        NS.SetWorkProgress(0,#keys,"Checking " .. (kind=="item" and "items" or "quests"))
+        for position, id in ipairs(keys) do
+            local indexed=entries[id]
             if (kind == "item" and NS.ItemMatches(indexed, query, words)) or
                 (kind == "quest" and (string.lower(indexed.name or ""):find(query, 1, true) or tostring(id) == query)) then
                 matchedID, matchedName = id, indexed.name
@@ -241,6 +248,7 @@ function NS.FindSources(query, kind, context)
                     if #results == before then Add(nil, quest.name, "No NPC or item source matches the current data/filters", nil, id) end
                 end
             end
+            NS.SetWorkProgress(position,#keys)
             NS.WorkYield()
         end
     end

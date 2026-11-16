@@ -180,6 +180,7 @@ function NS.StartCatalogue()
     local count = 0
     NS.catalogueLoading = true
     NS.RunWork("catalogue", function()
+            NS.SetWorkProgress(0,#ids,"Loading NPCs")
             for i = 1, #ids do
                 local id = ids[i]
                 local v = db.Npc.GetAll(id, NS.NPCFields)
@@ -192,6 +193,7 @@ function NS.StartCatalogue()
                     NS.catalogueStatus = string.format("QuestieDB: %d / %d NPCs · loading…", i, #ids)
                     if NS.ui then NS.ui.provider:SetText(NS.SearchStatus()) end
                 end
+                NS.SetWorkProgress(i,#ids)
                 NS.WorkYield()
             end
     end, function()
@@ -239,8 +241,15 @@ function NS.Find(query, context)
         seen[record.id] = true
         NS.WorkYield()
     end
-    for _, r in pairs(NS.records) do Add(r) end
-    for id, r in pairs(NS.db.sightings) do if not seen[id] then Add(r) end end
+    NS.SetWorkStage("Preparing NPC search")
+    local records, sightings = NS.WorkKeys(NS.records), NS.WorkKeys(NS.db.sightings)
+    local total=#records+#sightings
+    NS.SetWorkProgress(0,total,"Checking NPCs")
+    for i, id in ipairs(records) do Add(NS.records[id]); NS.SetWorkProgress(i,total) end
+    for i, id in ipairs(sightings) do
+        if not seen[id] then Add(NS.db.sightings[id]) end
+        NS.SetWorkProgress(#records+i,total); NS.WorkYield()
+    end
     if context then return result, metrics, origin end
     result = NS.SortSearchResults(result, metrics)
     -- Publish as one snapshot so cancelled searches cannot corrupt visible rows.

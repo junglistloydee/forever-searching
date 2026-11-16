@@ -751,6 +751,7 @@ NS.Print = printOriginal
 check(not NS.ui:IsShown(), "Search command respects combat restrictions")
 combat = false
 -- New personal tools, grouped results and source filters use only addon data.
+NS.OpenSearch(); drain()
 NS.db.settings.groupedResults = true
 NS.db.settings.sourceFilter, NS.db.settings.knownOnly = "all", false
 NS.ui.search:SetText("Roasted Meat"); drain()

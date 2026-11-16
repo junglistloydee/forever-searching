@@ -1,8 +1,12 @@
 # Forever Searching
 
-A WoW Forever addon with combined NPC, item and quest search, a collected-appearance wardrobe with custom profiles, vendor listings, location evidence, and native map/minimap navigation in a native Forever interface. Interface version **16001**, version **0.14.6**.
+A WoW Forever addon with combined NPC, item and quest search, a collected-appearance wardrobe with custom profiles, vendor listings, location evidence, and native map/minimap navigation in a native Forever interface. Interface version **16001**, version **0.14.7**.
 
 **Author:** [junglistloydee](https://github.com/junglistloydee)
+
+## Measured progress and closed-window cancellation in 0.14.7
+
+Search and catalogue loading show checked/total counts and a percentage for the current stage. Percentages restart for each labelled stage; sorting counts processing steps rather than unique items. While totals are being prepared, the bar remains animated. Closing the window cancels searches and unfinished catalogue jobs, including queued continuations. Hidden refreshes do not start new searches. Reopening retries interrupted loading while retaining completed caches. No global settings or keybinding changes.
 
 ## Search activity bar in 0.14.6
 

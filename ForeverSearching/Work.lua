@@ -2,14 +2,41 @@ local _, NS = ...
 local jobs, threads = {}, {}
 function NS.SetWorkStage(label)
     local job = threads[coroutine.running()]
-    if job then job.stage = label end
+    if job then job.stage, job.checked, job.total = label, nil, nil end
+end
+
+function NS.SetWorkProgress(checked, total, label)
+    local job = threads[coroutine.running()]
+    if job then
+        job.checked, job.total = checked, total
+        if label then job.stage = label end
+    end
+end
+
+function NS.WorkKeys(source)
+    local keys = {}
+    for key in pairs(source) do keys[#keys+1]=key; NS.WorkYield() end
+    return keys
+end
+
+function NS.CancelSearchWork()
+    NS.CancelWork("search")
+    NS.CancelWork("catalogue")
+    if NS.catalogueLoading then NS.catalogueStarted=nil; NS.catalogueLoading=false end
+    for _, kind in ipairs({"item","quest"}) do
+        NS.CancelWork(kind .. "Index")
+        if NS[kind .. "Loading"] then
+            NS[kind .. "Loading"]=false
+            NS[kind .. "Status"]=nil
+        end
+    end
 end
 
 function NS.SearchActivity()
     for _, entry in ipairs({{"catalogue", "Loading NPCs"}, {"itemIndex", "Loading items"},
         {"questIndex", "Loading quests"}, {"search", "Finding closest sources"}}) do
         local job = jobs[entry[1]]
-        if job then return job.stage or entry[2] end
+        if job then return job.stage or entry[2], job.checked, job.total end
     end
 end
 local function Clock()
@@ -51,6 +78,10 @@ function NS.SortResults(items, less)
     -- Native table.sort cannot yield. Merge sort keeps large result lists inside
     -- the same cooperative frame budget as location indexing and filtering.
     local size, width, buffer = #items, 1, {}
+    local passes, span = 0, 1
+    while span < size do passes=passes+1; span=span*2 end
+    local checked=0
+    NS.SetWorkProgress(0,size*passes,"Sorting results")
     while width < size do
         for start = 1, size, width * 2 do
             local middle, finish = math.min(start + width - 1, size), math.min(start + width * 2 - 1, size)
@@ -59,6 +90,7 @@ function NS.SortResults(items, less)
                 if left <= middle and (right > finish or not less(items[right], items[left])) then
                     buffer[index], left = items[left], left + 1
                 else buffer[index], right = items[right], right + 1 end
+                checked=checked+1; NS.SetWorkProgress(checked,size*passes)
                 if index % 64 == 0 then NS.WorkYield() end
             end
         end

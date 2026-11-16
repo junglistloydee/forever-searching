@@ -6,14 +6,22 @@ function NS.UpdateSearchProgress(elapsed)
     local ui = NS.ui
     if InCombatLockdown() or not ui or not ui.searchProgress then return end
     local progress = ui.searchProgress
-    local stage = NS.SearchActivity()
+    local stage, checked, total = NS.SearchActivity()
     local active = stage ~= nil and ui:IsShown() and not ui.transmogPanel:IsShown()
     progress:SetShown(active); ui.status:SetShown(not active)
     if not active then progress.elapsed=0; return end
     progress.elapsed = (progress.elapsed or 0) + (elapsed or 0)
-    local offset = (1-math.cos(progress.elapsed*2.5))*0.5*584
-    progress.pulse:ClearAllPoints(); progress.pulse:SetPoint("TOPLEFT",4+offset,-3)
-    progress.label:SetText(stage .. "...")
+    progress.pulse:ClearAllPoints()
+    if total and total > 0 then
+        local fraction=math.max(0,math.min(1,checked/total))
+        progress.pulse:SetPoint("TOPLEFT",4,-3)
+        progress.pulse:SetWidth(math.max(1,724*fraction))
+        progress.label:SetText(string.format("%s: %d / %d checked (%d%%)",stage,checked,total,math.floor(fraction*100)))
+    else
+        local offset = (1-math.cos(progress.elapsed*2.5))*0.5*584
+        progress.pulse:SetWidth(140); progress.pulse:SetPoint("TOPLEFT",4+offset,-3)
+        progress.label:SetText(stage .. ": preparing...")
+    end
 end
 function NS.InstallSearchLinkHook()
     if NS.searchLinkHookInstalled or type(hooksecurefunc) ~= "function" then return end
@@ -205,7 +213,7 @@ end
 
 function NS.Refresh(renderOnly)
     local ui = NS.ui
-    if not ui or InCombatLockdown() then return end
+    if not ui or not ui:IsShown() or InCombatLockdown() then return end
     ui.typingTicket=(ui.typingTicket or 0)+1
     NS.PrepareTarget()
     local query = ui.search:GetText()
@@ -871,7 +879,7 @@ function NS.BuildUI()
         ui.wowhead.box:ClearFocus()
         NS.CancelWork("transmogBrowser")
         if ui.transmog then ui.transmog.nameBox:ClearFocus(); ui.transmog.query:ClearFocus() end
-        NS.CancelWork("search")
+        NS.CancelSearchWork()
         NS.CancelRoutePlanning()
         ui.searchPending, ui.refreshAgain = false, false
     end)

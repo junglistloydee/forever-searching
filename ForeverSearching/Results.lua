@@ -15,7 +15,8 @@ end
 function NS.FilterResults(rows, metrics)
     local kept = {}
     local stats = {matched = #rows, sourceExcluded = 0, locationExcluded = 0}
-    for _, row in ipairs(rows) do
+    NS.SetWorkProgress(0,#rows,"Filtering results")
+    for position, row in ipairs(rows) do
         local sourceMatches = NS.db.settings.sourceFilter == "all" or NS.SourceCategory(row) == NS.db.settings.sourceFilter
         if not row.contextType then
             local token = ({vendors = "vendor", givers = "quest giver"})[NS.db.settings.sourceFilter]
@@ -25,6 +26,7 @@ function NS.FilterResults(rows, metrics)
         if not sourceMatches then stats.sourceExcluded = stats.sourceExcluded + 1
         elseif NS.db.settings.knownOnly and not located then stats.locationExcluded = stats.locationExcluded + 1
         else kept[#kept + 1] = row end
+        NS.SetWorkProgress(position,#rows)
         NS.WorkYield()
     end
     return kept, stats
@@ -32,7 +34,8 @@ end
 
 function NS.MakeGroups(rows, metrics)
     local result, byKey = {}, {}
-    for _, row in ipairs(rows) do
+    NS.SetWorkProgress(0,#rows,"Grouping sources")
+    for position, row in ipairs(rows) do
         local entity = NS.EntityInfo(row)
         if row.contextType and entity then
             local key = "group:" .. entity.kind .. ":" .. entity.id
@@ -53,10 +56,15 @@ function NS.MakeGroups(rows, metrics)
             end
             group.members[#group.members + 1] = row
         else result[#result + 1] = row end
+        NS.SetWorkProgress(position,#rows)
         NS.WorkYield()
     end
     local labels = {vendors = "Vendors", drops = "NPC drops", quests = "Quests", other = "Other / unavailable sources"}
-    for _, group in pairs(byKey) do
+    NS.SetWorkStage("Preparing source sections")
+    local groupKeys=NS.WorkKeys(byKey)
+    NS.SetWorkProgress(0,#groupKeys,"Building source sections")
+    for position, key in ipairs(groupKeys) do
+        local group=byKey[key]
         for _, row in ipairs(group.members) do
             local category = NS.SourceCategory(row)
             if category == "rewards" or category == "givers" or row.questID and category == "other" then category = "quests" end
@@ -74,6 +82,7 @@ function NS.MakeGroups(rows, metrics)
                 for _, row in ipairs(members) do group.expandedRows[#group.expandedRows + 1] = row; NS.WorkYield() end
             end
         end
+        NS.SetWorkProgress(position,#groupKeys)
     end
     return result
 end

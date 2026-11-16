@@ -81,3 +81,30 @@ drain(); NS.UpdateSearchProgress(0.1)
 check(failed and not NS.ui.searchProgress:IsShown(),"Failed searches cannot leave a stuck progress bar")
 setCombat(true); NS.UpdateSearchProgress(0.1); setCombat(false)
 NS.Close()
+
+NS.OpenSearch(); drain()
+NS.RunWork("search",function()
+    NS.SetWorkProgress(25,100,"Checking items"); coroutine.yield()
+end,function() end)
+NS.UpdateSearchProgress(0.1)
+local stage,checked,total=NS.SearchActivity()
+check(stage=="Checking items" and checked==25 and total==100,"Progress exposes actual checked and total counts")
+check(NS.ui.searchProgress.label:GetText():find("25 / 100 checked (25%)",1,true),"Progress label displays measured percentage and counts")
+NS.CancelWork("search"); drain()
+local savedStarted,savedLoading=NS.catalogueStarted,NS.catalogueLoading
+local savedItemLoading,savedQuestLoading=NS.itemLoading,NS.questLoading
+local resumed,published=0,0
+for _,key in ipairs({"search","catalogue","itemIndex","questIndex"}) do
+    NS.RunWork(key,function() coroutine.yield(); resumed=resumed+1 end,function() published=published+1 end)
+end
+NS.catalogueStarted,NS.catalogueLoading,NS.itemLoading,NS.questLoading=true,true,true,true
+NS.Close(); drain()
+check(resumed==0 and published==0 and NS.SearchActivity()==nil,"Closing cancels all search and catalogue jobs before queued work resumes")
+check(not NS.catalogueStarted and not NS.catalogueLoading and not NS.itemLoading and not NS.questLoading,"Cancelled loading is reset so reopening can retry")
+NS.ui.search:SetText("closed-window-search"); NS.Refresh(); drain()
+check(not NS.ui.searchPending and not NS.SearchActivity(),"Hidden edits and refresh callbacks cannot start searches")
+NS.catalogueStarted,NS.catalogueLoading=savedStarted,savedLoading
+NS.itemLoading,NS.questLoading=savedItemLoading,savedQuestLoading
+NS.OpenSearch(); drain()
+check(NS.ui.completedSearchKey:find("closed-window-search",1,true) and not NS.ui.searchPending,"Reopening runs the pending query normally")
+NS.Close()
