@@ -1,10 +1,9 @@
 local _, NS = ...
 local T=NS.Transmog
 
-function NS.BuildTransmogUI(ui,Text,Button,Panel)
-    local panel=CreateFrame("Frame",nil,ui,"BackdropTemplate")
+function NS.BuildTransmogUI(ui,Text,Button,Panel,Inset)
+    local panel=Inset(ui,24,-78,972,682)
     ui.transmogPanel=panel
-    panel:SetPoint("TOPLEFT",24,-78); panel:SetSize(972,682); Panel(panel)
     local state={slots={},slotIndex=1,optionIndex=1,categoryIndex=1,profilePage=1,itemPage=1,rows={},draft={},dirty=false,
         options={},categories={},undo={},redo={},sort="favourites",usableOnly=false,favouritesOnly=false,facing=0,zoom=1}
     ui.transmog=state
@@ -107,8 +106,7 @@ function NS.BuildTransmogUI(ui,Text,Button,Panel)
         infoBody:SetHeight(math.max(478,(infoText:GetStringHeight() or 478)+8)); infoScroll:SetVerticalScroll(0); infoPanel:Show()
     end
     infoPanel:Hide(); popup:Hide()
-    local backdrop=CreateFrame("Frame",nil,panel,"BackdropTemplate")
-    backdrop:SetPoint("TOPLEFT",208,-88); backdrop:SetSize(324,344); Panel(backdrop)
+    local backdrop=Inset(panel,208,-88,324,344)
     local ok,model=pcall(CreateFrame,"DressUpModel",nil,panel)
     if ok and model then
         state.model=model; model:SetPoint("TOPLEFT",246,-90); model:SetSize(248,390)

@@ -835,7 +835,7 @@ function NS.BuildUI()
         GameTooltip:Show()
     end)
     launcher:SetScript("OnLeave", function() GameTooltip:Hide() end)
-    NS.BuildTransmogUI(ui, Text, Button, Panel)
+    NS.BuildTransmogUI(ui, Text, Button, Panel, Inset)
     NS.BuildWowheadUI(ui, Text, Button, Panel)
     ui:SetScript("OnHide", function()
         if ui.choiceMenu and not InCombatLockdown() then ui.choiceMenu:Hide() end

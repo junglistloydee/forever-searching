@@ -1,8 +1,12 @@
 # Forever Searching
 
-A WoW Forever addon with combined NPC, item and quest search, a collected-appearance wardrobe with custom profiles, vendor listings, location evidence, and native map/minimap navigation in a native Forever interface. Interface version **16001**, version **0.14.3**.
+A WoW Forever addon with combined NPC, item and quest search, a collected-appearance wardrobe with custom profiles, vendor listings, location evidence, and native map/minimap navigation in a native Forever interface. Interface version **16001**, version **0.14.4**.
 
 **Author:** [junglistloydee](https://github.com/junglistloydee)
+
+## Wardrobe background consistency in 0.14.4
+
+The wardrobe and model preview now use the same native inset background as the search results and details panels. No gameplay, saved-data, game-setting or keybinding changes.
 
 ## Shift-click item search in 0.14.3
 
