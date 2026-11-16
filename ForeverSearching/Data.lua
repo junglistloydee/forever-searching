@@ -31,13 +31,14 @@ function NS.SearchStatus()
     if mode == "all" then
         if not NS.provider then return "Enable Forever QuestieDB for item/quest sources; personal NPC sightings still work." end
         local function State(kind)
-            return NS[kind .. "Loading"] and "loading" or NS[kind .. "Ready"] and "ready" or "not loaded"
+            return NS[kind .. "Loading"] and "loading" or NS[kind .. "Ready"] and "ready"
+                or NS[kind .. "Status"] or "load on search"
         end
         return "All · NPCs " .. (NS.catalogueLoading and "loading" or NS.catalogueStarted and "ready" or "not loaded")
             .. " · Items " .. State("item") .. " · Quests " .. State("quest") .. " · cached descriptions"
     end
-    return mode == "item" and (NS.itemStatus or "Item data loads when Items is selected.")
-        or mode == "quest" and (NS.questStatus or "Quest data loads when Quests is selected.") or NS.catalogueStatus
+    return mode == "item" and (NS.itemStatus or "Item data loads when you enter a search.")
+        or mode == "quest" and (NS.questStatus or "Quest data loads when you enter a search.") or NS.catalogueStatus
 end
 
 function NS.Readable(value)

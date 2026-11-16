@@ -780,9 +780,14 @@ function NS.BuildUI()
     dataHelp:SetScript("OnClick",function()
         if InCombatLockdown() then return end
         GameTooltip:SetOwner(dataHelp,"ANCHOR_TOP")
-        GameTooltip:AddLine("Forever Searching · by junglistloydee",1,0.82,0)
-        GameTooltip:AddLine(NS.SearchStatus(),1,1,1,true)
-        GameTooltip:AddLine("Data: QuestieDB · Questie team and contributors. Separate optional dependency.",0.8,0.8,0.8,true)
+        GameTooltip:AddLine("Forever Searching",1,0.82,0)
+        GameTooltip:AddLine("By junglistloydee",1,1,1,true)
+        for line in NS.SearchStatus():gsub(" · ", "\n"):gmatch("[^\n]+") do
+            GameTooltip:AddLine(line:match("^%s*(.-)%s*$"),1,1,1,true)
+        end
+        GameTooltip:AddLine("Data: QuestieDB",0.8,0.8,0.8,true)
+        GameTooltip:AddLine("Questie team and contributors",0.8,0.8,0.8,true)
+        GameTooltip:AddLine("Separate optional dependency",0.8,0.8,0.8,true)
         GameTooltip:Show()
     end)
     dataHelp:SetScript("OnLeave",function() GameTooltip:Hide() end)

@@ -4,7 +4,7 @@ A free addon for WoW Forever that brings NPC, item and quest search, vendor disc
 
 **Author:** [junglistloydee](https://github.com/junglistloydee)
 
-**Status:** Public beta · **Version:** 0.14.4 · **Interface:** 16001
+**Status:** Public beta · **Version:** 0.14.5 · **Interface:** 16001
 
 ## Features
 

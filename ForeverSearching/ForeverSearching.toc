@@ -3,7 +3,7 @@
 ## Notes: Search NPCs, items and quests; browse vendors, navigate, and save transmog profiles with previews.
 ## Author: junglistloydee
 ## X-Website: https://github.com/junglistloydee/forever-searching
-## Version: 0.14.4
+## Version: 0.14.5
 ## X-License: MIT
 ## X-Credits: QuestieDB - Questie team and contributors (separate data dependency)
 ## SavedVariables: ForeverSearchingDB
