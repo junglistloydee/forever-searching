@@ -1,0 +1,26 @@
+local NS,check,drain,setCombat=...
+NS.OpenSearch(); drain()
+NS.selected=nil; NS.ui.search:SetText(""); drain()
+check(not NS.ui.favourite:IsShown() and not NS.ui.navigate:IsShown() and not NS.ui.wowheadButton:IsShown(),"Empty selection hides contextual actions")
+local mode=NS.db.settings.searchMode
+NS.ui.modeButton.scripts.OnClick()
+check(NS.db.settings.searchMode==mode and NS.ui.choiceMenu:IsShown(),"Mode button opens choices without changing the search")
+NS.ui.choiceMenu.rows[2].scripts.OnClick(); drain()
+check(NS.db.settings.searchMode=="npc" and not NS.ui.choiceMenu:IsShown(),"Choosing NPCs switches mode directly")
+local menu=NS.ui.choiceMenu
+NS.ui.sourceFilter.scripts.OnClick()
+check(NS.ui.choiceMenu==menu,"Search controls reuse their menu instead of leaking frames")
+NS.ui.choiceMenu.rows[2].scripts.OnClick(); drain()
+check(NS.db.settings.sourceFilter=="vendors","Source dropdown directly selects vendors")
+NS.ui.quickSort.scripts.OnClick(); NS.ui.choiceMenu.rows[2].scripts.OnClick(); drain()
+check(NS.db.settings.sort=="name","Result-header sort directly selects names")
+NS.ui.modeButton.scripts.OnClick(); setCombat(true)
+NS.ui.choiceMenu.rows[4].scripts.OnClick()
+check(NS.db.settings.searchMode=="npc","Menu selection cannot change search state in combat")
+setCombat(false)
+NS.db.settings.sort="distance"; NS.db.settings.sourceFilter="all"
+NS.ui.search:SetText(""); drain()
+NS.ui.page=1; NS.ui.listInset.scripts.OnMouseWheel(NS.ui.listInset,-1)
+check(NS.ui.page==math.min(2,math.max(1,math.ceil(#NS.ui.displayRows/6))),"Mouse wheel advances result pages within bounds")
+NS.Close()
+check(not menu:IsShown(),"Closing search dismisses its dropdown")

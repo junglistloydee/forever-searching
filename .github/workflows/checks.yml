@@ -1,0 +1,33 @@
+name: Addon checks
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Lua test runner
+        run: npm install --prefix .tools fengari-node-cli@0.1.0
+      - name: Regression and performance checks
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          foreach ($suite in @('tests/run.lua', 'tests/performance.lua', 'tests/search-performance.lua')) {
+            $result = & node .tools/node_modules/fengari-node-cli/src/lua-cli.js $suite 2>&1
+            $result
+            if ($LASTEXITCODE -ne 0 -or ($result -join "`n") -notmatch 'PASS:') {
+              throw "Lua suite failed: $suite"
+            }
+          }
+      - name: Release safety guards
+        run: ./scripts/test-build-safety.ps1
+      - name: Build addon archive
+        run: ./scripts/build.ps1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ForeverSearching
+          path: dist/ForeverSearching-*.zip

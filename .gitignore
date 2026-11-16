@@ -1,0 +1,8 @@
+.tools/
+*.tmp
+dist/
+.DS_Store
+Thumbs.db
+*.log
+node_modules/
+WTF/

@@ -1,0 +1,32 @@
+## Interface: 16001
+## Title: Forever Searching
+## Notes: Search NPCs, items and quests; browse vendors, navigate, and save transmog profiles with previews.
+## Author: junglistloydee
+## X-Website: https://github.com/junglistloydee/forever-searching
+## Version: 0.14.2
+## X-License: MIT
+## X-Credits: QuestieDB - Questie team and contributors (separate data dependency)
+## SavedVariables: ForeverSearchingDB
+## OptionalDeps: QuestieDB
+
+Work.lua
+Controls.lua
+Data.lua
+Evidence.lua
+Distance.lua
+Settings.lua
+ItemText.lua
+Sources.lua
+Personal.lua
+Results.lua
+QuestDetails.lua
+Merchants.lua
+Transmog.lua
+VendorProfiles.lua
+Links.lua
+Navigation.lua
+ShoppingRoute.lua
+Core.lua
+ToolsUI.lua
+TransmogUI.lua
+UI.lua
